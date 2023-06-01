@@ -130,7 +130,8 @@ class Trainer:
             device=self.device,
             requires_grad=True,
         )
-        l_t = torch.FloatTensor(self.batch_size, 2).uniform_(-1, 1).to(self.device)
+        l_t = torch.FloatTensor(
+            self.batch_size, 2).uniform_(-1, 1).to(self.device)
         l_t.requires_grad = True
 
         return h_t, l_t
@@ -156,7 +157,8 @@ class Trainer:
 
             print(
                 "\nEpoch: {}/{} - LR: {:.6f}".format(
-                    epoch + 1, self.epochs, self.optimizer.param_groups[0]["lr"]
+                    epoch +
+                    1, self.epochs, self.optimizer.param_groups[0]["lr"]
                 )
             )
 
@@ -246,7 +248,8 @@ class Trainer:
                     log_pi.append(p)
 
                 # last iteration
-                h_t, l_t, b_t, log_probas, p = self.model(x, l_t, h_t, last=True)
+                h_t, l_t, b_t, log_probas, p = self.model(
+                    x, l_t, h_t, last=True)
                 log_pi.append(p)
                 baselines.append(b_t)
                 locs.append(l_t[0:9])
@@ -303,10 +306,12 @@ class Trainer:
                     imgs = [g.cpu().data.numpy().squeeze() for g in imgs]
                     locs = [l.cpu().data.numpy() for l in locs]
                     pickle.dump(
-                        imgs, open(self.plot_dir + "g_{}.p".format(epoch + 1), "wb")
+                        imgs, open(self.plot_dir +
+                                   "g_{}.p".format(epoch + 1), "wb")
                     )
                     pickle.dump(
-                        locs, open(self.plot_dir + "l_{}.p".format(epoch + 1), "wb")
+                        locs, open(self.plot_dir +
+                                   "l_{}.p".format(epoch + 1), "wb")
                     )
 
                 # log to tensorboard
@@ -358,7 +363,8 @@ class Trainer:
             log_probas = log_probas.view(self.M, -1, log_probas.shape[-1])
             log_probas = torch.mean(log_probas, dim=0)
 
-            baselines = baselines.contiguous().view(self.M, -1, baselines.shape[-1])
+            baselines = baselines.contiguous().view(
+                self.M, -1, baselines.shape[-1])
             baselines = torch.mean(baselines, dim=0)
 
             log_pi = log_pi.contiguous().view(self.M, -1, log_pi.shape[-1])
@@ -474,12 +480,15 @@ class Trainer:
         if best:
             filename = self.model_name + "_model_best.pth.tar"
         ckpt_path = os.path.join(self.ckpt_dir, filename)
+        print(ckpt_path)
         ckpt = torch.load(ckpt_path)
 
         # load variables from checkpoint
         self.start_epoch = ckpt["epoch"]
         self.best_valid_acc = ckpt["best_valid_acc"]
         self.model.load_state_dict(ckpt["model_state"])
+        print("we are loading a lot.")
+        print(ckpt["model_state"].keys())
         self.optimizer.load_state_dict(ckpt["optim_state"])
 
         if best:
