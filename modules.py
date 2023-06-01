@@ -70,7 +70,7 @@ class Retina:
         """Extract a single patch for each image in `x`.
 
         Args:
-        x: a 4D Tensor of shape (B, H, W, C). The minibatch
+        x: a 4D Tensor of shape (B, C, H, W). The minibatch
             of images.
         l: a 2D Tensor of shape (B, 2).
         size: a scalar defining the size of the extracted patch.
@@ -89,7 +89,8 @@ class Retina:
         # loop through mini-batch and extract patches
         patch = []
         for i in range(B):
-            patch.append(x[i, :, start[i, 1] : end[i, 1], start[i, 0] : end[i, 0]])
+            patch.append(
+                x[i, :, start[i, 1]: end[i, 1], start[i, 0]: end[i, 0]])
         return torch.stack(patch)
 
     def denormalize(self, T, coords):
