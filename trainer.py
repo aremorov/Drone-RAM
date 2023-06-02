@@ -422,8 +422,8 @@ class Trainer:
             total += 1
             x, y = x.to(self.device), y.to(self.device)
 
-            x = x[0:1, :, :, :]
-            y = y[0:1]
+            # x = x[0:1, :, :, :]
+            # y = y[0:1]
             # duplicate M times, M=1 so don't need
             # x = x.repeat(self.M, 1, 1, 1)
 
@@ -446,7 +446,7 @@ class Trainer:
 
             correct += pred.eq(y.data.view_as(pred)).cpu().sum()
 
-        # total = self.num_test
+        total = self.num_test
         perc = (100.0 * correct) / total  # (self.num_test)
         error = 100 - perc
         print(
@@ -495,8 +495,6 @@ class Trainer:
         self.start_epoch = ckpt["epoch"]
         self.best_valid_acc = ckpt["best_valid_acc"]
         self.model.load_state_dict(ckpt["model_state"])
-        print("we are loading a lot.")
-        print(ckpt["model_state"].keys())
         self.optimizer.load_state_dict(ckpt["optim_state"])
 
         if best:

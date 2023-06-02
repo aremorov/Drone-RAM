@@ -104,11 +104,12 @@ class Retina:
         B, C, H, W = x.shape
 
         start = self.denormalize(H, l)
-        newSize = 3
+        newSize = 4
         end = start + newSize
         # pad with zeros
         # x = F.pad(x, (size // 2, size // 2, size // 2, size // 2))
-        x = F.pad(x, (1, 1, 1, 1), value=torch.min(x))
+        x = F.pad(x, (newSize//2, newSize//2, newSize //
+                  2, newSize//2), value=torch.min(x))
         # loop through mini-batch and extract patches
         patch = []
         for i in range(B):
