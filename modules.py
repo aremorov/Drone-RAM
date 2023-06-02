@@ -82,9 +82,9 @@ class Retina:
 
         start = self.denormalize(H, l)
         end = start + size
-
         # pad with zeros
-        x = F.pad(x, (size // 2, size // 2, size // 2, size // 2))
+        # x = F.pad(x, (size // 2, size // 2, size // 2, size // 2))
+        x = F.pad(x, (1, 1, 1, 1))
 
         # loop through mini-batch and extract patches
         patch = []
@@ -154,7 +154,6 @@ class GlimpseNetwork(nn.Module):
 
         # glimpse layer
         D_in = k * g * g * c
-        print(k, g, c, D_in)
         self.fc1 = nn.Linear(D_in, h_g)
 
         # location layer
@@ -220,7 +219,6 @@ class CoreNetwork(nn.Module):
 
         self.input_size = input_size
         self.hidden_size = hidden_size
-
         self.i2h = nn.Linear(input_size, hidden_size)
         self.h2h = nn.Linear(hidden_size, hidden_size)
 
