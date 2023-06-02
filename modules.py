@@ -66,6 +66,29 @@ class Retina:
 
         return phi
 
+    def intensity(self, loc, img):
+        """
+        loc is tensor([y, x]), 
+        img is tensor with shape: (1,H,W), generally H=W
+        returns intensity of 3x3 square centered about loc
+        """
+        totalCharge = 0
+        nRows, nColumns = img.shape
+        xLoc = loc[1].item()
+        yLoc = loc[0].item()
+
+        boostedImg = torch.sub(img, torch.min(img))
+
+        for yi in [yLoc-1, yLoc, yLoc+1]:
+            for xi in [xLoc-1, xLoc, xLoc+1]:
+                r2 = (xLoc - xi) ** 2 + (yLoc - yi) ** 2
+                if (r2 != 0):
+                    pointCharge = boostedImg[yi, xi]/r2
+                    totalCharge += pointCharge
+
+        tanhTotal = torch.tanh(totalCharge/(nRows))
+        return tanhTotal.item()
+
     def extract_patch(self, x, l, size):
         """Extract a single patch for each image in `x`.
 
@@ -81,20 +104,18 @@ class Retina:
         B, C, H, W = x.shape
 
         start = self.denormalize(H, l)
-        end = start + size
-
+        newSize = 3
+        end = start + newSize
         # pad with zeros
         # x = F.pad(x, (size // 2, size // 2, size // 2, size // 2))
-        x = F.pad(x, (1, 1, 1, 1), value=-0.4242)
+        x = F.pad(x, (1, 1, 1, 1), value=torch.min(x))
         # loop through mini-batch and extract patches
         patch = []
         for i in range(B):
-            print(start[i])
-            print(end[i])
-            print(l[i])
-            print(self.denormalize(H, l[i]))
-            patch.append(
-                x[i, :, start[i, 1]: end[i, 1], start[i, 0]: end[i, 0]])
+            window = x[i, :, start[i, 1]: end[i, 1], start[i, 0]: end[i, 0]]
+            windowMean = torch.reshape(torch.mean(window), (1, 1, 1))
+            patch.append(windowMean)
+
         return torch.stack(patch)
 
     def denormalize(self, T, coords):
