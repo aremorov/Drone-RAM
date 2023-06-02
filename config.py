@@ -17,7 +17,7 @@ def add_argument_group(name):
 # glimpse network params
 glimpse_arg = add_argument_group("Glimpse Network Params")
 glimpse_arg.add_argument(
-    "--patch_size", type=int, default=8, help="size of extracted patch at highest res"
+    "--patch_size", type=int, default=1, help="size of extracted patch at highest res"
 )
 glimpse_arg.add_argument(
     "--glimpse_scale", type=int, default=1, help="scale of successive patches"
@@ -38,7 +38,8 @@ core_arg = add_argument_group("Core Network Params")
 core_arg.add_argument(
     "--num_glimpses", type=int, default=6, help="# of glimpses, i.e. BPTT iterations"
 )
-core_arg.add_argument("--hidden_size", type=int, default=256, help="hidden size of rnn")
+core_arg.add_argument("--hidden_size", type=int,
+                      default=256, help="hidden size of rnn")
 
 
 # reinforce params
@@ -85,7 +86,7 @@ data_arg.add_argument(
 # training params
 train_arg = add_argument_group("Training Params")
 train_arg.add_argument(
-    "--is_train", type=str2bool, default=False, help="Whether to train or test the model"
+    "--is_train", type=str2bool, default=True, help="Whether to train or test the model"
 )
 train_arg.add_argument(
     "--momentum", type=float, default=0.5, help="Nesterov momentum value"

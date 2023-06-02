@@ -113,6 +113,7 @@ class Trainer:
             self.hidden_size,
             self.num_classes,
         )
+
         self.model.to(self.device)
 
         # initialize optimizer and scheduler
@@ -440,11 +441,9 @@ class Trainer:
 
             log_probas = log_probas.view(self.M, -1, log_probas.shape[-1])
             log_probas = torch.mean(log_probas, dim=0)
-            print(log_probas)
 
             pred = log_probas.data.max(1, keepdim=True)[1]
-            print(pred)
-            print(y)
+
             correct += pred.eq(y.data.view_as(pred)).cpu().sum()
 
         # total = self.num_test

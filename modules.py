@@ -154,6 +154,7 @@ class GlimpseNetwork(nn.Module):
 
         # glimpse layer
         D_in = k * g * g * c
+        print(k, g, c, D_in)
         self.fc1 = nn.Linear(D_in, h_g)
 
         # location layer
