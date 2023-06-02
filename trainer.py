@@ -440,6 +440,7 @@ class Trainer:
 
             log_probas = log_probas.view(self.M, -1, log_probas.shape[-1])
             log_probas = torch.mean(log_probas, dim=0)
+            print(log_probas)
 
             pred = log_probas.data.max(1, keepdim=True)[1]
             print(pred)
