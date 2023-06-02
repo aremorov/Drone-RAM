@@ -82,13 +82,17 @@ class Retina:
 
         start = self.denormalize(H, l)
         end = start + size
+
         # pad with zeros
         # x = F.pad(x, (size // 2, size // 2, size // 2, size // 2))
-        x = F.pad(x, (1, 1, 1, 1))
-
+        x = F.pad(x, (1, 1, 1, 1), value=-0.4242)
         # loop through mini-batch and extract patches
         patch = []
         for i in range(B):
+            print(start[i])
+            print(end[i])
+            print(l[i])
+            print(self.denormalize(H, l[i]))
             patch.append(
                 x[i, :, start[i, 1]: end[i, 1], start[i, 0]: end[i, 0]])
         return torch.stack(patch)
