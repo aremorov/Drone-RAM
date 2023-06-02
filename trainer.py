@@ -2,6 +2,7 @@ import os
 import time
 import shutil
 import pickle
+import numpy as np
 
 import torch
 import torch.nn.functional as F
@@ -415,11 +416,15 @@ class Trainer:
         # load the best checkpoint
         self.load_checkpoint(best=self.best)
 
+        total = 0
         for i, (x, y) in enumerate(self.test_loader):
+            total += 1
             x, y = x.to(self.device), y.to(self.device)
 
-            # duplicate M times
-            x = x.repeat(self.M, 1, 1, 1)
+            x = x[0:1, :, :, :]
+            y = y[0:1]
+            # duplicate M times, M=1 so don't need
+            # x = x.repeat(self.M, 1, 1, 1)
 
             # initialize location vector and hidden state
             self.batch_size = x.shape[0]
@@ -437,13 +442,16 @@ class Trainer:
             log_probas = torch.mean(log_probas, dim=0)
 
             pred = log_probas.data.max(1, keepdim=True)[1]
+            print(pred)
+            print(y)
             correct += pred.eq(y.data.view_as(pred)).cpu().sum()
 
-        perc = (100.0 * correct) / (self.num_test)
+        # total = self.num_test
+        perc = (100.0 * correct) / total  # (self.num_test)
         error = 100 - perc
         print(
             "[*] Test Acc: {}/{} ({:.2f}% - {:.2f}%)".format(
-                correct, self.num_test, perc, error
+                correct, total, perc, error
             )
         )
 
