@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 
 import modules
 
@@ -80,7 +81,11 @@ class RecurrentAttention(nn.Module):
         g_t = self.sensor(x, l_t_prev)
         h_t = self.rnn(g_t, h_t_prev)
 
-        log_pi, l_t = self.locator(h_t)
+        log_pi, dl_t = self.locator(h_t)
+        if (torch.max(torch.abs(l_t_prev)).item() >= 0.9):
+            dl_t = torch.zeros_like(dl_t)
+        l_t = l_t_prev + dl_t
+
         b_t = self.baseliner(h_t).squeeze()
 
         if last:

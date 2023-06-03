@@ -330,10 +330,28 @@ class LocationNetwork(nn.Module):
         self.fc_lt = nn.Linear(hid_size, output_size)
 
     def forward(self, h_t):
+        directions = torch.tensor([
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+        ]) * 0.15
+
         # compute mean
         feat = F.relu(self.fc(h_t.detach()))
-        mu = torch.tanh(self.fc_lt(feat))
+        mu = torch.sigmoid(self.fc_lt(feat))  # between 0 and 1
+        # Calculate the sum of probabilities
+        mu_sum = mu.sum(dim=1, keepdim=True)
+        # semi-normalized, so guarantee positive
+        mu_normalized = (mu+1e-10) / (mu_sum + 1e-8)
 
+        index = torch.multinomial(mu_normalized, num_samples=1)
+
+        l_t = directions[index[:, 0]]
+        log_pi = torch.log(torch.gather(mu, 1, index)).squeeze()
+
+        """
+        mu = mu * 2 - 1  # between -1 and 1
         firstColumn = mu[:, 0].unsqueeze(1)
 
         updatedCenter = torch.cat([firstColumn, firstColumn], dim=1)
@@ -352,7 +370,7 @@ class LocationNetwork(nn.Module):
 
         # bound between [-1, 1]
         l_t = torch.clamp(l_t, -1, 1)
-
+        """
         return log_pi, l_t
 
 

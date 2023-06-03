@@ -132,8 +132,10 @@ class Trainer:
             device=self.device,
             requires_grad=True,
         )
-        l_t = torch.FloatTensor(
-            self.batch_size, 2).uniform_(-1, 1).to(self.device)
+        # l_t = torch.FloatTensor(
+        #    self.batch_size, 2).uniform_(-1, 1).to(self.device)
+        # print(l_t)
+        l_t = torch.zeros(self.batch_size, 2).to(self.device)
         l_t.requires_grad = True
 
         return h_t, l_t
@@ -271,7 +273,9 @@ class Trainer:
 
                 # compute reinforce loss
                 # summed over timesteps and averaged across batch
+
                 adjusted_reward = R - baselines.detach()
+
                 loss_reinforce = torch.sum(-log_pi * adjusted_reward, dim=1)
                 loss_reinforce = torch.mean(loss_reinforce, dim=0)
 

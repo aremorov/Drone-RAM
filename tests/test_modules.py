@@ -1,10 +1,8 @@
+import utils
+import modules
+import torch
 import sys
 sys.path.append("..")
-
-import torch
-
-import modules
-import utils
 
 
 if __name__ == "__main__":
@@ -36,7 +34,7 @@ if __name__ == "__main__":
     assert a_t.shape == (B, 10)
 
     loc_net = modules.LocationNetwork(256, 2, 0.11)
-    mu, l_t = loc_net(h_t)
+    log_pi, l_t = loc_net(h_t)
     assert l_t.shape == (B, 2)
 
     base = modules.BaselineNetwork(256, 1)
