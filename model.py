@@ -41,7 +41,7 @@ class RecurrentAttention(nn.Module):
         self.sensor = modules.GlimpseNetwork(h_g, h_l, g, k, s, c)
         self.rnn = modules.CoreNetwork(hidden_size, hidden_size)
         # changed to 1 since only single value needed
-        self.locator = modules.LocationNetwork(hidden_size, 1, std)
+        self.locator = modules.LocationNetwork(hidden_size, 4, std)
         self.classifier = modules.ActionNetwork(hidden_size, num_classes)
         self.baseliner = modules.BaselineNetwork(hidden_size, 1)
 

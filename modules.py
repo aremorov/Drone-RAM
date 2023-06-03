@@ -336,13 +336,14 @@ class LocationNetwork(nn.Module):
 
         firstColumn = mu[:, 0].unsqueeze(1)
 
-        mu2 = torch.cat([firstColumn, firstColumn], dim=1)
+        updatedCenter = torch.cat([firstColumn, firstColumn], dim=1)
 
-        mu = mu2
         # reparametrization trick
-        l_t = torch.distributions.Normal(mu, self.std).rsample()
+        l_t = torch.distributions.Normal(updatedCenter, self.std).rsample()
         l_t = l_t.detach()
-        log_pi = Normal(mu, self.std).log_prob(l_t)
+        l_t = updatedCenter.detach()
+
+        log_pi = Normal(updatedCenter, self.std).log_prob(l_t)
 
         # we assume both dimensions are independent
         # 1. pdf of the joint is the product of the pdfs
