@@ -334,6 +334,11 @@ class LocationNetwork(nn.Module):
         feat = F.relu(self.fc(h_t.detach()))
         mu = torch.tanh(self.fc_lt(feat))
 
+        firstColumn = mu[:, 0].unsqueeze(1)
+
+        mu2 = torch.cat([firstColumn, firstColumn], dim=1)
+
+        mu = mu2
         # reparametrization trick
         l_t = torch.distributions.Normal(mu, self.std).rsample()
         l_t = l_t.detach()
