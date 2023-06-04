@@ -83,7 +83,7 @@ class RecurrentAttention(nn.Module):
 
         log_pi, dl_t = self.locator(h_t)
         if (torch.max(torch.abs(l_t_prev)).item() >= 0.9):
-            dl_t = torch.zeros_like(dl_t)
+            dl_t = -l_t_prev  # send back to origin
         l_t = l_t_prev + dl_t
 
         b_t = self.baseliner(h_t).squeeze()

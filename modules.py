@@ -339,12 +339,11 @@ class LocationNetwork(nn.Module):
 
         # compute mean
         feat = F.relu(self.fc(h_t.detach()))
-        mu = torch.sigmoid(self.fc_lt(feat))  # between 0 and 1
+        mu = torch.sigmoid(self.fc_lt(feat))+1e-5  # between 0 and 1
         # Calculate the sum of probabilities
         mu_sum = mu.sum(dim=1, keepdim=True)
         # semi-normalized, so guarantee positive
         mu_normalized = (mu+1e-10) / (mu_sum + 1e-8)
-
         index = torch.multinomial(mu_normalized, num_samples=1)
 
         l_t = directions[index[:, 0]]
