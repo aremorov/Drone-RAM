@@ -59,14 +59,17 @@ def get_train_valid_loader(
 
     # load dataset
     loadedZeros = torch.load('./data/zeroImages.pt')
-    loadedOnes = torch.load('./data/zeroImages.pt')
+    loadedOnes = torch.load('./data/oneImages.pt')
 
     dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
     labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
     labels01[len(loadedOnes):] = 1
 
-    data_array = dataset01
-    label_array = labels01.long()
+    torch.manual_seed(52)
+    indices = torch.randperm(dataset01.size(0))
+
+    data_array = dataset01[indices]
+    label_array = labels01[indices].long()
 
 #    Create an instance of your custom dataset
     dataset = CustomDataset(data_array, label_array)
@@ -136,14 +139,18 @@ def get_test_loader(data_dir, batch_size, num_workers=4, pin_memory=False):
     # define transforms
     # load dataset
     loadedZeros = torch.load('./data/zeroImages.pt')
-    loadedOnes = torch.load('./data/zeroImages.pt')
+    loadedOnes = torch.load('./data/oneImages.pt')
 
     dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
     labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
     labels01[len(loadedOnes):] = 1
 
-    data_array = dataset01
-    label_array = labels01.long()
+    torch.manual_seed(52)
+    indices = torch.randperm(dataset01.size(0))
+
+    data_array = dataset01[indices]
+    label_array = labels01[indices].long()
+
 
 #    Create an instance of your custom dataset
     dataset = CustomDataset(data_array, label_array)
