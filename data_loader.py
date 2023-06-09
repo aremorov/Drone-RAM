@@ -6,6 +6,22 @@ from torchvision import datasets
 from torchvision import transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 
+from torch.utils.data import Dataset
+
+
+class CustomDataset(Dataset):
+    def __init__(self, data, labels):
+        self.data = data
+        self.labels = labels
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        image = self.data[idx]
+        label = self.labels[idx]
+        return image, label
+
 
 def get_train_valid_loader(
     data_dir,
@@ -38,11 +54,25 @@ def get_train_valid_loader(
     assert (valid_size >= 0) and (valid_size <= 1), error_msg
 
     # define transforms
-    normalize = transforms.Normalize((0.1307,), (0.3081,))
-    trans = transforms.Compose([transforms.ToTensor(), normalize])
+    # normalize = transforms.Normalize((0.1307,), (0.3081,))
+    # trans = transforms.Compose([transforms.ToTensor(), normalize])
 
     # load dataset
-    dataset = datasets.MNIST(data_dir, train=True, download=True, transform=trans)
+    loadedZeros = torch.load('./data/zeroImages.pt')
+    loadedOnes = torch.load('./data/zeroImages.pt')
+
+    dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
+    labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
+    labels01[len(loadedOnes):] = 1
+
+    data_array = dataset01
+    label_array = labels01.long()
+
+#    Create an instance of your custom dataset
+    dataset = CustomDataset(data_array, label_array)
+
+    # dataset = datasets.MNIST(data_dir, train=True,
+    #                         download=True, transform=trans)
 
     num_train = len(dataset)
     indices = list(range(num_train))
@@ -104,11 +134,19 @@ def get_test_loader(data_dir, batch_size, num_workers=4, pin_memory=False):
             True if using GPU.
     """
     # define transforms
-    normalize = transforms.Normalize((0.1307,), (0.3081,))
-    trans = transforms.Compose([transforms.ToTensor(), normalize])
-
     # load dataset
-    dataset = datasets.MNIST(data_dir, train=False, download=True, transform=trans)
+    loadedZeros = torch.load('./data/zeroImages.pt')
+    loadedOnes = torch.load('./data/zeroImages.pt')
+
+    dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
+    labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
+    labels01[len(loadedOnes):] = 1
+
+    data_array = dataset01
+    label_array = labels01.long()
+
+#    Create an instance of your custom dataset
+    dataset = CustomDataset(data_array, label_array)
 
     data_loader = torch.utils.data.DataLoader(
         dataset,
