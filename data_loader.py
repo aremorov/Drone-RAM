@@ -58,8 +58,8 @@ def get_train_valid_loader(
     # trans = transforms.Compose([transforms.ToTensor(), normalize])
 
     # load dataset
-    loadedZeros = torch.load('./data/zeroImages.pt')
-    loadedOnes = torch.load('./data/oneImages.pt')
+    loadedZeros = torch.load('./data/zeroImagesTrain.pt')
+    loadedOnes = torch.load('./data/oneImagesTrain.pt')
 
     dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
     labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
@@ -71,55 +71,24 @@ def get_train_valid_loader(
     data_array = dataset01[indices]
     label_array = labels01[indices].long()
 
-#    Create an instance of your custom dataset
-    dataset = CustomDataset(data_array, label_array)
-
-    # dataset = datasets.MNIST(data_dir, train=True,
-    #                         download=True, transform=trans)
-
-    num_train = len(dataset)
-    indices = list(range(num_train))
+    num_train = len(dataset01)
     split = int(np.floor(valid_size * num_train))
 
-    if shuffle:
-        np.random.seed(random_seed)
-        np.random.shuffle(indices)
+    trainDataset = CustomDataset(data_array[split:], label_array[split:])
+    validDataset = CustomDataset(data_array[:split], label_array[:split])
 
-    train_idx, valid_idx = indices[split:], indices[:split]
-
-    train_sampler = SubsetRandomSampler(train_idx)
-    valid_sampler = SubsetRandomSampler(valid_idx)
-
+    # can simplify this considerably...kist shuffle and partition train, valid
     train_loader = torch.utils.data.DataLoader(
-        dataset,
+        trainDataset,
         batch_size=batch_size,
-        sampler=train_sampler,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
+        shuffle=shuffle,
     )
 
     valid_loader = torch.utils.data.DataLoader(
-        dataset,
+        validDataset,
         batch_size=batch_size,
-        sampler=valid_sampler,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
+        shuffle=shuffle,
     )
-
-    # visualize some images
-    if show_sample:
-        sample_loader = torch.utils.data.DataLoader(
-            dataset,
-            batch_size=9,
-            shuffle=shuffle,
-            num_workers=num_workers,
-            pin_memory=pin_memory,
-        )
-        data_iter = iter(sample_loader)
-        images, labels = data_iter.next()
-        X = images.numpy()
-        X = np.transpose(X, [0, 2, 3, 1])
-        plot_images(X, labels)
 
     return (train_loader, valid_loader)
 
@@ -138,8 +107,8 @@ def get_test_loader(data_dir, batch_size, num_workers=4, pin_memory=False):
     """
     # define transforms
     # load dataset
-    loadedZeros = torch.load('./data/zeroImages.pt')
-    loadedOnes = torch.load('./data/oneImages.pt')
+    loadedZeros = torch.load('./data/zeroImagesTest.pt')
+    loadedOnes = torch.load('./data/oneImagesTest.pt')
 
     dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
     labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
@@ -154,13 +123,10 @@ def get_test_loader(data_dir, batch_size, num_workers=4, pin_memory=False):
 
 #    Create an instance of your custom dataset
     dataset = CustomDataset(data_array, label_array)
-
+    print(len(dataset))
     data_loader = torch.utils.data.DataLoader(
         dataset,
         batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=pin_memory,
     )
 
     return data_loader

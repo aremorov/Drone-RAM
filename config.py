@@ -61,7 +61,7 @@ data_arg.add_argument(
     help="Proportion of training set used for validation",
 )
 data_arg.add_argument(
-    "--batch_size", type=int, default=32, help="# of images in each batch of data"
+    "--batch_size", type=int, default=16, help="# of images in each batch of data"
 )
 data_arg.add_argument(
     "--num_workers",
@@ -92,7 +92,7 @@ train_arg.add_argument(
     "--momentum", type=float, default=0.5, help="Nesterov momentum value"
 )
 train_arg.add_argument(
-    "--epochs", type=int, default=10, help="# of epochs to train for"
+    "--epochs", type=int, default=50, help="# of epochs to train for"
 )
 train_arg.add_argument(
     "--init_lr", type=float, default=3e-4, help="Initial learning rate value"
