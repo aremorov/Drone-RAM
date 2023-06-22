@@ -245,7 +245,7 @@ class Trainer:
                 for t in range(self.num_glimpses - 1):
                     # forward pass through model
                     h_t, l_t, b_t, p = self.model(x, l_t, h_t)
-
+                    print(b_t)
                     # store
                     locs.append(l_t[0:9])
                     baselines.append(b_t)
@@ -270,7 +270,6 @@ class Trainer:
                 # compute losses for differentiable modules
                 loss_action = F.nll_loss(log_probas, y)
                 loss_baseline = F.mse_loss(baselines, R)
-
                 # compute reinforce loss
                 # summed over timesteps and averaged across batch
 
@@ -281,7 +280,14 @@ class Trainer:
 
                 # sum up into a hybrid loss
                 loss = loss_action + loss_baseline + loss_reinforce * 0.01
-
+                """
+                print("LOSS ACTION------------------")
+                print(loss_action)
+                print("LOSS REINFORCE------------------")
+                print(loss_reinforce*0.01)
+                print("LOSS BASELINE------------------")
+                print(loss_baseline)
+                """
                 # compute accuracy
                 correct = (predicted == y).float()
                 acc = 100 * (correct.sum() / len(y))

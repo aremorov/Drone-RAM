@@ -86,13 +86,13 @@ data_arg.add_argument(
 # training params
 train_arg = add_argument_group("Training Params")
 train_arg.add_argument(
-    "--is_train", type=str2bool, default=False, help="Whether to train or test the model"
+    "--is_train", type=str2bool, default=True, help="Whether to train or test the model"
 )
 train_arg.add_argument(
     "--momentum", type=float, default=0.5, help="Nesterov momentum value"
 )
 train_arg.add_argument(
-    "--epochs", type=int, default=50, help="# of epochs to train for"
+    "--epochs", type=int, default=10, help="# of epochs to train for"
 )
 train_arg.add_argument(
     "--init_lr", type=float, default=3e-4, help="Initial learning rate value"
