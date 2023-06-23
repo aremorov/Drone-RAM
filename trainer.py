@@ -61,7 +61,7 @@ class Trainer:
         else:
             self.test_loader = data_loader
             self.num_test = len(self.test_loader.dataset)
-        self.num_classes = 10
+        self.num_classes = 28*28
         self.num_channels = 1
 
         # training params
@@ -225,7 +225,6 @@ class Trainer:
                 self.optimizer.zero_grad()
 
                 x, y = x.to(self.device), y.to(self.device)
-
                 plot = False
                 if (epoch % self.plot_freq == 0) and (i == 0):
                     plot = True
@@ -245,30 +244,34 @@ class Trainer:
                 for t in range(self.num_glimpses - 1):
                     # forward pass through model
                     h_t, l_t, b_t, p = self.model(x, l_t, h_t)
-                    print(b_t)
                     # store
                     locs.append(l_t[0:9])
                     baselines.append(b_t)
                     log_pi.append(p)
 
                 # last iteration
-                h_t, l_t, b_t, log_probas, p = self.model(
+                h_t, l_t, b_t, pred, p = self.model(
                     x, l_t, h_t, last=True)
                 log_pi.append(p)
                 baselines.append(b_t)
                 locs.append(l_t[0:9])
+                # replace log_probas with generated image
 
-                # convert list to tensors and reshape
+               # convert list to tensors and reshape
                 baselines = torch.stack(baselines).transpose(1, 0)
                 log_pi = torch.stack(log_pi).transpose(1, 0)
 
                 # calculate reward
-                predicted = torch.max(log_probas, 1)[1]
-                R = (predicted.detach() == y).float()
+                pred = pred.reshape(x.shape)
+
+                diff = torch.abs(x-pred)/torch.numel(x[0])
+                R = -torch.sum(diff, dim=(1, 2, 3))
+
                 R = R.unsqueeze(1).repeat(1, self.num_glimpses)
 
                 # compute losses for differentiable modules
-                loss_action = F.nll_loss(log_probas, y)
+                loss_action = -torch.sum(diff)
+
                 loss_baseline = F.mse_loss(baselines, R)
                 # compute reinforce loss
                 # summed over timesteps and averaged across batch
@@ -280,16 +283,9 @@ class Trainer:
 
                 # sum up into a hybrid loss
                 loss = loss_action + loss_baseline + loss_reinforce * 0.01
-                """
-                print("LOSS ACTION------------------")
-                print(loss_action)
-                print("LOSS REINFORCE------------------")
-                print(loss_reinforce*0.01)
-                print("LOSS BASELINE------------------")
-                print(loss_baseline)
-                """
+
                 # compute accuracy
-                correct = (predicted == y).float()
+                correct = (torch.mean(diff)).float()
                 acc = 100 * (correct.sum() / len(y))
 
                 # store

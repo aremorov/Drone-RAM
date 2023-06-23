@@ -286,6 +286,7 @@ class ActionNetwork(nn.Module):
         self.fc = nn.Linear(input_size, output_size)
 
     def forward(self, h_t):
+        # keep logmax for now, but maybe remove later...
         a_t = F.log_softmax(self.fc(h_t), dim=1)
         return a_t
 

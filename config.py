@@ -61,7 +61,7 @@ data_arg.add_argument(
     help="Proportion of training set used for validation",
 )
 data_arg.add_argument(
-    "--batch_size", type=int, default=16, help="# of images in each batch of data"
+    "--batch_size", type=int, default=8, help="# of images in each batch of data"
 )
 data_arg.add_argument(
     "--num_workers",
