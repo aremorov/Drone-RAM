@@ -283,12 +283,23 @@ class ActionNetwork(nn.Module):
     def __init__(self, input_size, output_size):
         super().__init__()
 
-        self.fc = nn.Linear(input_size, output_size)
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose2d(256, 32, 7),
+            nn.ReLU(),
+            nn.ConvTranspose2d(32, 16, 3, stride=2,
+                               padding=1, output_padding=1),
+            nn.ReLU(),
+            nn.ConvTranspose2d(16, 1, 3, stride=2,
+                               padding=1, output_padding=1),
+            nn.Sigmoid())
 
     def forward(self, h_t):
-        # keep logmax for now, but maybe remove later...
-        a_t = F.log_softmax(self.fc(h_t), dim=1)
-        return a_t
+        # print(self.decoder[0].weight[0][0])
+        inputTensor = h_t.reshape(h_t.shape[0], h_t.shape[1], 1, 1)
+        outputTensor = torch.tanh(self.decoder(inputTensor))
+
+        outputTensor = outputTensor.reshape(h_t.shape[0], 28*28)
+        return outputTensor
 
 
 class LocationNetwork(nn.Module):
@@ -336,7 +347,7 @@ class LocationNetwork(nn.Module):
             [-1, 0],
             [0, 1],
             [0, -1]
-        ]) * 0.15
+        ]) * 0.2
 
         # compute mean
         feat = F.relu(self.fc(h_t.detach()))
@@ -345,7 +356,7 @@ class LocationNetwork(nn.Module):
         mu_sum = mu.sum(dim=1, keepdim=True)
         mu_normalized = (mu) / (mu_sum + 1e-8)
         index = torch.multinomial(mu_normalized, num_samples=1)
-
+        # print(mu_normalized)
         l_t = directions[index[:, 0]]
         log_pi = torch.log(torch.gather(mu, 1, index)).squeeze()
 

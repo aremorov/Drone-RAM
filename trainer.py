@@ -61,7 +61,7 @@ class Trainer:
         else:
             self.test_loader = data_loader
             self.num_test = len(self.test_loader.dataset)
-        self.num_classes = 28*28
+        self.num_classes = 728
         self.num_channels = 1
 
         # training params
@@ -175,7 +175,7 @@ class Trainer:
             # # reduce lr if validation loss plateaus
             self.scheduler.step(-valid_acc)
 
-            is_best = valid_acc > self.best_valid_acc
+            is_best = True  # valid_acc > self.best_valid_acc
             msg1 = "train loss: {:.3f} - train acc: {:.3f} "
             msg2 = "- val loss: {:.3f} - val acc: {:.3f} - val err: {:.3f}"
             if is_best:
@@ -263,15 +263,12 @@ class Trainer:
 
                 # calculate reward
                 pred = pred.reshape(x.shape)
-
-                diff = torch.abs(x-pred)/torch.numel(x[0])
+                diff = (x-pred)**2 / torch.numel(x)  # RMS
                 R = -torch.sum(diff, dim=(1, 2, 3))
-
                 R = R.unsqueeze(1).repeat(1, self.num_glimpses)
 
                 # compute losses for differentiable modules
-                loss_action = -torch.sum(diff)
-
+                loss_action = torch.sum(diff)
                 loss_baseline = F.mse_loss(baselines, R)
                 # compute reinforce loss
                 # summed over timesteps and averaged across batch
@@ -282,8 +279,15 @@ class Trainer:
                 loss_reinforce = torch.mean(loss_reinforce, dim=0)
 
                 # sum up into a hybrid loss
-                loss = loss_action + loss_baseline + loss_reinforce * 0.01
-
+                loss = loss_action  # + loss_baseline + loss_reinforce * 0.01
+                """
+                print("LOSS ACTION------------------")
+                print(loss_action)
+                print("LOSS REINFORCE------------------")
+                print(loss_reinforce*0.01)
+                print("LOSS BASELINE------------------")
+                print(loss_baseline)
+                """
                 # compute accuracy
                 correct = (torch.mean(diff)).float()
                 acc = 100 * (correct.sum() / len(y))
@@ -359,7 +363,7 @@ class Trainer:
                 log_pi.append(p)
 
             # last iteration
-            h_t, l_t, b_t, log_probas, p = self.model(x, l_t, h_t, last=True)
+            h_t, l_t, b_t, pred, p = self.model(x, l_t, h_t, last=True)
             log_pi.append(p)
             baselines.append(b_t)
 
@@ -367,24 +371,16 @@ class Trainer:
             baselines = torch.stack(baselines).transpose(1, 0)
             log_pi = torch.stack(log_pi).transpose(1, 0)
 
-            # average
-            log_probas = log_probas.view(self.M, -1, log_probas.shape[-1])
-            log_probas = torch.mean(log_probas, dim=0)
-
-            baselines = baselines.contiguous().view(
-                self.M, -1, baselines.shape[-1])
-            baselines = torch.mean(baselines, dim=0)
-
-            log_pi = log_pi.contiguous().view(self.M, -1, log_pi.shape[-1])
-            log_pi = torch.mean(log_pi, dim=0)
-
             # calculate reward
-            predicted = torch.max(log_probas, 1)[1]
-            R = (predicted.detach() == y).float()
+            pred = pred.reshape(x.shape)
+
+            diff = (x-pred)**2 / torch.numel(x)
+            R = -torch.sum(diff, dim=(1, 2, 3))
+
             R = R.unsqueeze(1).repeat(1, self.num_glimpses)
 
             # compute losses for differentiable modules
-            loss_action = F.nll_loss(log_probas, y)
+            loss_action = torch.sum(diff)
             loss_baseline = F.mse_loss(baselines, R)
 
             # compute reinforce loss
@@ -393,10 +389,10 @@ class Trainer:
             loss_reinforce = torch.mean(loss_reinforce, dim=0)
 
             # sum up into a hybrid loss
-            loss = loss_action + loss_baseline + loss_reinforce * 0.01
+            loss = loss_action  # + loss_baseline + loss_reinforce * 0.01
 
             # compute accuracy
-            correct = (predicted == y).float()
+            correct = (torch.mean(diff)).float()
             acc = 100 * (correct.sum() / len(y))
 
             # store
