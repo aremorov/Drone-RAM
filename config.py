@@ -36,7 +36,7 @@ glimpse_arg.add_argument(
 # core network params
 core_arg = add_argument_group("Core Network Params")
 core_arg.add_argument(
-    "--num_glimpses", type=int, default=15, help="# of glimpses, i.e. BPTT iterations"
+    "--num_glimpses", type=int, default=100, help="# of glimpses, i.e. BPTT iterations"
 )
 core_arg.add_argument("--hidden_size", type=int,
                       default=256, help="hidden size of rnn")
@@ -95,7 +95,7 @@ train_arg.add_argument(
     "--epochs", type=int, default=10, help="# of epochs to train for"
 )
 train_arg.add_argument(
-    "--init_lr", type=float, default=3e-4, help="Initial learning rate value"
+    "--init_lr", type=float, default=1e-2, help="Initial learning rate value"
 )
 train_arg.add_argument(
     "--lr_patience",
