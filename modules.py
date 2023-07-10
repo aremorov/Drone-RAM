@@ -104,8 +104,6 @@ class Retina:
         B, C, H, W = x.shape
 
         start = self.denormalize(H, l)
-        newSize = 4
-        end = start + newSize
         # pad with zeros
         # x = F.pad(x, (size // 2, size // 2, size // 2, size // 2))
         # x = F.pad(x, (newSize//2, newSize//2, newSize //
@@ -114,8 +112,11 @@ class Retina:
         patch = []
         for i in range(B):
             window = x[i, :, start[i, 1], start[i, 0]]
-            windowMean = torch.reshape(torch.mean(window), (1, 1, 1))
+            windowMean = torch.reshape(window, (1, 1, 1))
             patch.append(windowMean)
+            # print(window)
+            # print(windowMean)
+            # print("----ok----")
 
         return torch.stack(patch)
 

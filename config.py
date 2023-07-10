@@ -36,7 +36,7 @@ glimpse_arg.add_argument(
 # core network params
 core_arg = add_argument_group("Core Network Params")
 core_arg.add_argument(
-    "--num_glimpses", type=int, default=10, help="# of glimpses, i.e. BPTT iterations"
+    "--num_glimpses", type=int, default=100, help="# of glimpses, i.e. BPTT iterations"
 )
 core_arg.add_argument("--hidden_size", type=int,
                       default=256, help="hidden size of rnn")
@@ -61,7 +61,7 @@ data_arg.add_argument(
     help="Proportion of training set used for validation",
 )
 data_arg.add_argument(
-    "--batch_size", type=int, default=16, help="# of images in each batch of data"
+    "--batch_size", type=int, default=32, help="# of images in each batch of data"
 )
 data_arg.add_argument(
     "--num_workers",
