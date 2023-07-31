@@ -86,7 +86,7 @@ data_arg.add_argument(
 # training params
 train_arg = add_argument_group("Training Params")
 train_arg.add_argument(
-    "--is_train", type=str2bool, default=False, help="Whether to train or test the model"
+    "--is_train", type=str2bool, default=True, help="Whether to train or test the model"
 )
 train_arg.add_argument(
     "--momentum", type=float, default=0.5, help="Nesterov momentum value"

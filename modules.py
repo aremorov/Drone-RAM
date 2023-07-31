@@ -206,7 +206,7 @@ class GlimpseNetwork(nn.Module):
         # feed to fc layer
         g_t = F.relu(what + where)
 
-        return g_t
+        return [g_t, phi]
 
 
 class CoreNetwork(nn.Module):

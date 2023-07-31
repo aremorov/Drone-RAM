@@ -78,7 +78,7 @@ class RecurrentAttention(nn.Module):
                 output log probability vector over the classes.
             log_pi: a vector of length (B,).
         """
-        g_t = self.sensor(x, l_t_prev)
+        [g_t, phi] = self.sensor(x, l_t_prev)
         h_t = self.rnn(g_t, h_t_prev)
 
         log_pi, dl_t = self.locator(h_t)
