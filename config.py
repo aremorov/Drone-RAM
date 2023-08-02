@@ -36,7 +36,7 @@ glimpse_arg.add_argument(
 # core network params
 core_arg = add_argument_group("Core Network Params")
 core_arg.add_argument(
-    "--num_glimpses", type=int, default=100, help="# of glimpses, i.e. BPTT iterations"
+    "--num_glimpses", type=int, default=20, help="# of glimpses, i.e. BPTT iterations"
 )
 core_arg.add_argument("--hidden_size", type=int,
                       default=256, help="hidden size of rnn")
@@ -61,7 +61,7 @@ data_arg.add_argument(
     help="Proportion of training set used for validation",
 )
 data_arg.add_argument(
-    "--batch_size", type=int, default=16, help="# of images in each batch of data"
+    "--batch_size", type=int, default=64, help="# of images in each batch of data"
 )
 data_arg.add_argument(
     "--num_workers",
@@ -86,27 +86,27 @@ data_arg.add_argument(
 # training params
 train_arg = add_argument_group("Training Params")
 train_arg.add_argument(
-    "--is_train", type=str2bool, default=True, help="Whether to train or test the model"
+    "--is_train", type=str2bool, default=False, help="Whether to train or test the model"
 )
 train_arg.add_argument(
     "--momentum", type=float, default=0.5, help="Nesterov momentum value"
 )
 train_arg.add_argument(
-    "--epochs", type=int, default=50, help="# of epochs to train for"
+    "--epochs", type=int, default=150, help="# of epochs to train for"
 )
 train_arg.add_argument(
-    "--init_lr", type=float, default=3e-4, help="Initial learning rate value"
+    "--init_lr", type=float, default=3e-3, help="Initial learning rate value"
 )
 train_arg.add_argument(
     "--lr_patience",
     type=int,
-    default=20,
+    default=200,
     help="Number of epochs to wait before reducing lr",
 )
 train_arg.add_argument(
     "--train_patience",
     type=int,
-    default=50,
+    default=200,
     help="Number of epochs to wait before stopping train",
 )
 

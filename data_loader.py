@@ -61,8 +61,9 @@ def get_train_valid_loader(
     loadedZeros = torch.load('./data/oneImagesTrain.pt')
     loadedOnes = torch.load('./data/oneImagesTrain.pt')
 
-    dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)
-    labels01 = torch.zeros(len(loadedZeros)+len(loadedOnes))
+    dataset01 = torch.cat(
+        (loadedOnes, loadedOnes, loadedOnes, loadedOnes, loadedOnes), dim=0)
+    labels01 = torch.zeros(len(loadedZeros)*5)
     labels01[len(loadedOnes):] = 1
 
     torch.manual_seed(52)

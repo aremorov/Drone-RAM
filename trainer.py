@@ -269,7 +269,7 @@ class Trainer:
                 # calculate reward
                 predicted = torch.max(log_probas, 1)[1]
 
-                R = -phi_list
+                R = -phi_list.detach()
 
                 # compute losses for differentiable modules
                 loss_action = F.nll_loss(log_probas, y)
@@ -278,13 +278,12 @@ class Trainer:
                 # compute reinforce loss
                 # summed over timesteps and averaged across batch
 
-                adjusted_reward = R - baselines.detach()
-
+                adjusted_reward = R  # - baselines.detach()
                 loss_reinforce = torch.sum(-log_pi * adjusted_reward, dim=1)
                 loss_reinforce = torch.mean(loss_reinforce, dim=0)
 
                 # sum up into a hybrid loss
-                loss = loss_reinforce
+                loss = loss_reinforce * 10
 
                 # compute accuracy
                 correct = (predicted == y).float()
@@ -389,19 +388,19 @@ class Trainer:
             # calculate reward
             predicted = torch.max(log_probas, 1)[1]
 
-            R = -phi_list
+            R = -phi_list.detach()
 
             # compute losses for differentiable modules
             loss_action = F.nll_loss(log_probas, y)
             loss_baseline = F.mse_loss(baselines, R)
 
             # compute reinforce loss
-            adjusted_reward = R - baselines.detach()
+            adjusted_reward = R  # - baselines.detach()
             loss_reinforce = torch.sum(-log_pi * adjusted_reward, dim=1)
             loss_reinforce = torch.mean(loss_reinforce, dim=0)
 
             # sum up into a hybrid loss
-            loss = loss_reinforce
+            loss = loss_reinforce * 10
 
             # compute accuracy
             correct = (predicted == y).float()
