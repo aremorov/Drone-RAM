@@ -58,7 +58,7 @@ def get_train_valid_loader(
     # trans = transforms.Compose([transforms.ToTensor(), normalize])
 
     # load dataset
-    loadedZeros = torch.load('./data/zeroImagesTrain.pt')
+    loadedZeros = torch.load('./data/oneImagesTrain.pt')
     loadedOnes = torch.load('./data/oneImagesTrain.pt')
 
     dataset01 = torch.cat((loadedZeros, loadedOnes), dim=0)

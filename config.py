@@ -36,7 +36,7 @@ glimpse_arg.add_argument(
 # core network params
 core_arg = add_argument_group("Core Network Params")
 core_arg.add_argument(
-    "--num_glimpses", type=int, default=15, help="# of glimpses, i.e. BPTT iterations"
+    "--num_glimpses", type=int, default=100, help="# of glimpses, i.e. BPTT iterations"
 )
 core_arg.add_argument("--hidden_size", type=int,
                       default=256, help="hidden size of rnn")
@@ -86,7 +86,7 @@ data_arg.add_argument(
 # training params
 train_arg = add_argument_group("Training Params")
 train_arg.add_argument(
-    "--is_train", type=str2bool, default=False, help="Whether to train or test the model"
+    "--is_train", type=str2bool, default=True, help="Whether to train or test the model"
 )
 train_arg.add_argument(
     "--momentum", type=float, default=0.5, help="Nesterov momentum value"

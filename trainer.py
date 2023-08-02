@@ -175,7 +175,7 @@ class Trainer:
             # # reduce lr if validation loss plateaus
             self.scheduler.step(-valid_acc)
 
-            is_best = valid_acc > self.best_valid_acc
+            is_best = True
             msg1 = "train loss: {:.3f} - train acc: {:.3f} "
             msg2 = "- val loss: {:.3f} - val acc: {:.3f} - val err: {:.3f}"
             if is_best:
@@ -242,6 +242,7 @@ class Trainer:
                 locs = []
                 log_pi = []
                 baselines = []
+                phi_list = []
                 for t in range(self.num_glimpses - 1):
                     # forward pass through model
                     h_t, l_t, b_t, p, phi = self.model(x, l_t, h_t)
@@ -250,6 +251,7 @@ class Trainer:
                     locs.append(l_t[0:9])
                     baselines.append(b_t)
                     log_pi.append(p)
+                    phi_list.append(phi)
 
                 # last iteration
                 h_t, l_t, b_t, log_probas, p, phi = self.model(
@@ -257,15 +259,17 @@ class Trainer:
                 log_pi.append(p)
                 baselines.append(b_t)
                 locs.append(l_t[0:9])
+                phi_list.append(phi)
 
                 # convert list to tensors and reshape
                 baselines = torch.stack(baselines).transpose(1, 0)
                 log_pi = torch.stack(log_pi).transpose(1, 0)
+                phi_list = torch.stack(phi_list).transpose(1, 0).squeeze()
 
                 # calculate reward
                 predicted = torch.max(log_probas, 1)[1]
-                R = (predicted.detach() == y).float()
-                R = R.unsqueeze(1).repeat(1, self.num_glimpses)
+
+                R = -phi_list
 
                 # compute losses for differentiable modules
                 loss_action = F.nll_loss(log_probas, y)
@@ -280,7 +284,7 @@ class Trainer:
                 loss_reinforce = torch.mean(loss_reinforce, dim=0)
 
                 # sum up into a hybrid loss
-                loss = loss_action + loss_baseline + loss_reinforce * 0.01
+                loss = loss_reinforce
 
                 # compute accuracy
                 correct = (predicted == y).float()
@@ -348,6 +352,8 @@ class Trainer:
             # extract the glimpses
             log_pi = []
             baselines = []
+            phi_list = []
+
             for t in range(self.num_glimpses - 1):
                 # forward pass through model
                 h_t, l_t, b_t, p, phi = self.model(x, l_t, h_t)
@@ -355,16 +361,19 @@ class Trainer:
                 # store
                 baselines.append(b_t)
                 log_pi.append(p)
+                phi_list.append(phi)
 
             # last iteration
             h_t, l_t, b_t, log_probas, p, phi = self.model(
                 x, l_t, h_t, last=True)
             log_pi.append(p)
             baselines.append(b_t)
+            phi_list.append(phi)
 
             # convert list to tensors and reshape
             baselines = torch.stack(baselines).transpose(1, 0)
             log_pi = torch.stack(log_pi).transpose(1, 0)
+            phi_list = torch.stack(phi_list).transpose(1, 0).squeeze()
 
             # average
             log_probas = log_probas.view(self.M, -1, log_probas.shape[-1])
@@ -379,8 +388,8 @@ class Trainer:
 
             # calculate reward
             predicted = torch.max(log_probas, 1)[1]
-            R = (predicted.detach() == y).float()
-            R = R.unsqueeze(1).repeat(1, self.num_glimpses)
+
+            R = -phi_list
 
             # compute losses for differentiable modules
             loss_action = F.nll_loss(log_probas, y)
@@ -392,7 +401,7 @@ class Trainer:
             loss_reinforce = torch.mean(loss_reinforce, dim=0)
 
             # sum up into a hybrid loss
-            loss = loss_action + loss_baseline + loss_reinforce * 0.01
+            loss = loss_reinforce
 
             # compute accuracy
             correct = (predicted == y).float()
@@ -426,11 +435,6 @@ class Trainer:
         for i, (x, y) in enumerate(self.test_loader):
             total += 1
             x, y = x.to(self.device), y.to(self.device)
-
-            # x = x[0:1, :, :, :]
-            # y = y[0:1]
-            # duplicate M times, M=1 so don't need
-            # x = x.repeat(self.M, 1, 1, 1)
 
             # initialize location vector and hidden state
             self.batch_size = x.shape[0]
