@@ -244,7 +244,7 @@ class Trainer:
                 baselines = []
                 for t in range(self.num_glimpses - 1):
                     # forward pass through model
-                    h_t, l_t, b_t, p = self.model(x, l_t, h_t)
+                    h_t, l_t, b_t, p, phi = self.model(x, l_t, h_t)
 
                     # store
                     locs.append(l_t[0:9])
@@ -252,7 +252,7 @@ class Trainer:
                     log_pi.append(p)
 
                 # last iteration
-                h_t, l_t, b_t, log_probas, p = self.model(
+                h_t, l_t, b_t, log_probas, p, phi = self.model(
                     x, l_t, h_t, last=True)
                 log_pi.append(p)
                 baselines.append(b_t)
@@ -350,14 +350,15 @@ class Trainer:
             baselines = []
             for t in range(self.num_glimpses - 1):
                 # forward pass through model
-                h_t, l_t, b_t, p = self.model(x, l_t, h_t)
+                h_t, l_t, b_t, p, phi = self.model(x, l_t, h_t)
 
                 # store
                 baselines.append(b_t)
                 log_pi.append(p)
 
             # last iteration
-            h_t, l_t, b_t, log_probas, p = self.model(x, l_t, h_t, last=True)
+            h_t, l_t, b_t, log_probas, p, phi = self.model(
+                x, l_t, h_t, last=True)
             log_pi.append(p)
             baselines.append(b_t)
 
@@ -438,10 +439,11 @@ class Trainer:
             # extract the glimpses
             for t in range(self.num_glimpses - 1):
                 # forward pass through model
-                h_t, l_t, b_t, p = self.model(x, l_t, h_t)
+                h_t, l_t, b_t, p, phi = self.model(x, l_t, h_t)
 
             # last iteration
-            h_t, l_t, b_t, log_probas, p = self.model(x, l_t, h_t, last=True)
+            h_t, l_t, b_t, log_probas, p, phi = self.model(
+                x, l_t, h_t, last=True)
 
             log_probas = log_probas.view(self.M, -1, log_probas.shape[-1])
             log_probas = torch.mean(log_probas, dim=0)
